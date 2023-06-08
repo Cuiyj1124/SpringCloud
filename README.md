@@ -401,3 +401,44 @@ spring:
           predicates:
             - Path=/order/**
 ```
+
+##### 路由过滤器 GateWayfilter
+
+ GateWayFilter是网关中提供的一种过滤器，可以对进入网关的请求和微服务返回的响应做处理
+
+##### 全局过滤器 GlobalFilter
+
+  全局过滤器的作用也是处理一切进入网关的请求和微服务相应，与GatewayFilter的作用一样，区别是GateWayfilter通过配置定义，处理逻辑是固定的，而GlobalFilter的逻辑需要自己写代码实现，定义的方式是实现GlobalFilter接口
+
+##### 过滤器执行顺序
+
+- 每一个过滤器都必须指定一个int类型的order值，order值越小，优先级越高，执行顺序越靠前
+- GlobalFilter通过实现Ordered接口，或提娜佳@Order注解来指定order值，由我们自己指定
+- 路由过滤器和defaultFilter的order由spring指定，默认是按照声明顺序从1递增
+- 当过滤器的order值一样时，会按照defaultFilter>路由过滤器>GlobalFilter的顺序执行
+
+##### 跨域请求配置
+
+```yaml
+spring:
+  cloud:
+    gateway:
+        globalcors: # 全局的跨域处理
+          add-to-simple-url-handler-mapping: true # 解决options请求被拦截问题
+          corsConfigurations:
+            '[/**]':
+              allowedOrigins: # 允许哪些网站的跨域请求
+                - "http://localhost:63343"
+                - "http://www.leyou.com"
+              allowedMethods: # 允许的跨域ajax的请求方式
+                - "GET"
+                - "POST"
+                - "DELETE"
+                - "PUT"
+                - "OPTIONS"
+              allowedHeaders: "*" # 允许在请求中携带的头信息
+              allowCredentials: true # 是否允许携带cookie
+              maxAge: 360000 # 这次跨域检测的有效期
+```
+
+
