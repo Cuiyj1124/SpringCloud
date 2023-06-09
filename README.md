@@ -441,4 +441,79 @@ spring:
               maxAge: 360000 # 这次跨域检测的有效期
 ```
 
+### Docker容器
 
+##### Docker与虚拟机的区别
+
+|   特性   |  Docker  |  虚拟机  |
+| :------: | :------: | :------: |
+|   性能   | 接近原生 | 性能较差 |
+| 硬盘占用 | 一般为MB | 一般为GB |
+|   启动   |   秒级   |  分钟级  |
+
+### RabbitMQ消息队列
+
+##### 四种MQ对比
+
+|            |       RabbitMQ       |           ActiveMQ            |  RocketMQ  |   Kafka    |
+| :--------: | :------------------: | :---------------------------: | :--------: | :--------: |
+|  公司社区  |        Rabbit        |            Apache             |    阿里    |   Apache   |
+|  开发语言  |        Erlang        |             Java              |    Java    | Scala&Java |
+|  协议支持  | AMQP,XMPP,SMTP,STOMP | OpenWire,STOMP,REST,XMPP,AMQP | 自定义协议 | 自定义协议 |
+|   可用性   |          高          |             一般              |     高     |     高     |
+| 单机吞吐量 |         一般         |              差               |     高     |   非常高   |
+|  消息延迟  |        微秒级        |            毫秒级             |   毫秒级   |  毫秒以内  |
+| 消息可靠性 |          高          |             一般              |     高     |    一般    |
+
+#####  SpringAMQP的使用
+
+1. 发送消息
+
+   1.引入amqp的依赖
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-amqp</artifactId>
+   </dependency>
+   ```
+
+​		2.配置rabbitmq地址
+
+```yaml
+spring:
+  rabbitmq:
+    host: 192.168.220.128
+    port: 5672
+    username: rabbit
+    password: 1124
+    virtual-host: /
+```
+
+​		3.利用RabbitTemplate的convertAndSend方法
+
+```java
+String queueName = "simple queue";
+String message = "hello,spring amqp!";
+
+rabbitTemplate.convertAndSend(queueName,message);
+```
+
+​	2.消息的接收
+
+​    	 前两步和发小消息一致
+
+​		1.接收消息方法
+
+```java
+@Component
+public class RabbitListenerMessage {
+
+    @RabbitListener(queues = "simple queue")
+    public void ListenerMessage(String msg){
+        System.out.println("消费者接收到消息："+msg);
+    }
+}
+```
+
+使用@RabbitListener注解，来完成消息的接收
