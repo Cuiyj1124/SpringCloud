@@ -517,3 +517,230 @@ public class RabbitListenerMessage {
 ```
 
 使用@RabbitListener注解，来完成消息的接收
+  
+  
+##### SpringAMQP中消息的序列化和反序列化
+
+1.引入依赖
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+</dependency>
+```
+
+2.配置bean
+
+```java
+@Bean
+public MessageConverter messageConverter(){
+    return new Jackson2JsonMessageConverter();
+}
+```
+
+之后发送消息和接受消息，都会自动帮我们进行序列化
+
+### Elasticsearch
+
+##### 1.什么是Elasticsearch？
+
+ 一个开源的分布式搜索引擎，可以用来实现搜索、日志统计、分析、系统监控等功能
+
+##### 2.什么是elastic stack（ELK）？
+
+是以Elasticsearch为核心的技术栈，包括beats、Logstash、kibana、elasticsearch
+
+##### 3.正向索引和倒排索引
+
+###### 	3.1 什么是正向索引
+
+​		基于文档id创建索引。查词条时必须先找到文档，而后判断是否包含词条。
+
+###### 	3.2 什么是倒排索引
+
+​		对文档内容分词，对词条创建索引，并记录词条所在文档的信息。查询时先根据词条查询到文档id，而后获取到文档。·
+
+##### 4.索引库操作
+
+###### 	4.1 mapping属性
+
+- type：数据类型
+- index：是否索引
+- analyzer：分词器
+- properties：子字段
+
+###### 	4.2 type常见的有哪些
+
+- 字符串：text、keyword
+- 数字：long、integer、short、byte、double、float
+- 布尔：boolean
+- 日期：date
+- 对象：Object
+
+###### 	4.3 创建索引库
+
+```json
+PUT /heima
+{
+  "mappings": {
+    "properties": {
+      "info":{
+        "type": "text",
+        "analyzer": "ik_smart"
+      },
+      "email":{
+        "type": "text",
+        "index": false
+      },
+      "name":{
+        "type": "object",
+        "properties": {
+          "firstName":{
+            "type":"keyword"
+          },
+          "lastName":{
+            "type":"keyword"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+​    1.查看索引库
+
+​		`GET /索引库名`
+
+​	2.删除索引库
+
+​		`DELETE /索引库名`
+
+​	3.修改索引库（不能修改原有的字段，但可以新增字段）
+
+```json
+PUT /heima/_mapping
+{
+  "properties":{
+    "age":{
+      "type":"integer"
+    }
+  }
+}
+```
+
+##### 5. 文档操作
+
+1.新增	
+
+```json
+POST /heima/_doc/1
+{
+  "info": "枪出如龙",
+  "email":"zy@163.com",
+  "name":{
+    "firstName":"云",
+    "lastName":"赵"
+  }
+}
+```
+
+2.查询文档
+
+​	`GET /heima/_doc/1`
+
+3.删除文档
+
+​	`DELETE /heima/_doc/1`
+
+4.修改文档
+
+​	方式一：全量修改，会删除旧文档，添加新文档
+
+```json
+PUT /索引库名/_doc/文档id{
+	"字段1":"值1",
+	"字段2":"值2",
+	...
+}
+```
+
+ 	方式二：增量修改，修改指定字段值
+
+```json
+POST  /索引库名/_update/文档id{
+	"doc":{
+		"字段名":"新的值"，
+	}
+}
+```
+
+##### 6.RestClient操作索引库
+
+######  1.创建索引库
+
+​		1.导入依赖
+
+```xml
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+</dependency>
+```
+
+​		2.建立连接
+
+```java
+@BeforeEach
+void setUp(){
+    this.restHighLevelClient = new RestHighLevelClient(RestClient.builder(
+       HttpHost.create("http://192.168.220.128:9200")
+    ));
+}
+
+@AfterEach
+void tearDown() throws IOException {
+    this.restHighLevelClient.close();
+}
+```
+
+​		3.创建索引库
+
+```java
+void createHotelIndex() throws IOException {
+    //1.创建request对象
+    CreateIndexRequest request = new CreateIndexRequest("hotel");
+    //2.准备请求的参数：DSl语句，mapping_index是自己定义的DSL语句
+    request.source(mapping_index, XContentType.JSON);
+    ///3.发送请求
+    restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+}
+```
+
+​		4.删除索引库
+
+```java
+void testDeleteIndex() throws IOException {
+
+    //1.创建request对象
+    DeleteIndexRequest request = new DeleteIndexRequest("hotel");
+    //2.发送请求
+    restHighLevelClient.indices().delete(request,RequestOptions.DEFAULT);
+}
+```
+
+​		5.判断索引库是否存在
+
+```java
+void testExistsIndex() throws IOException {
+
+    //1.创建request对象
+    GetIndexRequest request = new GetIndexRequest("hotel");
+    //2.发送请求
+    boolean exists = restHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+
+    System.out.println(exists ? "索引库存在" : "没有找到");
+}
+```
+  
