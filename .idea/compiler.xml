@@ -9,6 +9,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="MQ_publisher" />
+        <module name="hotel-demo" />
         <module name="order-service" />
         <module name="user-service" />
         <module name="eureka-server" />
@@ -26,6 +27,7 @@
       <module name="eureka-server" options="-parameters" />
       <module name="feign-api" options="-parameters" />
       <module name="gateway" options="-parameters" />
+      <module name="hotel-demo" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>

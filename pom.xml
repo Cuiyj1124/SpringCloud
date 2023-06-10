@@ -13,6 +13,7 @@
         <module>order-service</module>
         <module>eureka-server</module>
         <module>feign-api</module>
+        <module>hotel-demo</module>
         <module>gateway</module>
         <module>MQ_publisher</module>
         <module>MQ_Consumer</module>
@@ -70,6 +71,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>2.3.9.RELEASE</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
