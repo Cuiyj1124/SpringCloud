@@ -689,7 +689,7 @@ POST  /索引库名/_update/文档id{
 </dependency>
 ```
 
-​		2.始化estlient
+​		2.初始化RestClient
 
 ```java
 private RestHighLevelClient restHighLevelClient;	
