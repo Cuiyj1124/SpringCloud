@@ -689,9 +689,11 @@ POST  /索引库名/_update/文档id{
 </dependency>
 ```
 
-​		2.建立连接
+​		2.始化estlient
 
 ```java
+private RestHighLevelClient restHighLevelClient;	
+	
 @BeforeEach
 void setUp(){
     this.restHighLevelClient = new RestHighLevelClient(RestClient.builder(
